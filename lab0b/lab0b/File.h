@@ -1,14 +1,19 @@
 #pragma once
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <map>
 #include <vector>
 #include <list>
 #include <string>
+#include <algorithm>
 
 namespace labFile 
-{
+{	
+	inline bool cmp(std::pair<std::string, size_t> first, std::pair<std::string, size_t> second)
+	{
+		return first.second < second.second;
+	}
+
 	struct DelimsLocale : std::ctype<char>
 	{
 		DelimsLocale(std::string const &delims) : std::ctype<char>(get_table(delims)) {}
@@ -16,11 +21,8 @@ namespace labFile
 		static std::ctype_base::mask const* get_table(std::string const &delims) 
 		{
 			static std::vector<std::ctype_base::mask> delimiters(table_size, std::ctype_base::mask()); 
-
 			for (unsigned char ch : delims)
-			{
 				delimiters[ch] = std::ctype_base::space;
-			}
 				
 			return &delimiters[0];
 		}
@@ -30,17 +32,28 @@ namespace labFile
 	{
 	private:
 		std::map<std::string, size_t> freqTable;
-		std::list<std::pair<std::string, int>> freqList;
+		std::list<std::pair<std::string, size_t>> freqList;
 		std::string delimiters;
 	public:
 		FileStringSpliter() : std::ifstream() {};
 		FileStringSpliter(std::string &fileName) : std::ifstream(fileName) {};
+		~FileStringSpliter();
 		void setDelimiters(std::string &delims);
 		void setDefaultDelimiters();
-		void printFreqList();
 		bool fillAndSortFreqList();
 		bool fillFreqTable();
-		bool cmp(std::pair<std::string, int> first, std::pair<std::string, int> second);
+		std::list<std::pair<std::string, size_t>> getList();
+	};
 
+	class FileWriter : public std::ofstream
+	{
+	private:
+		std::list<std::pair<std::string, size_t>> text;
+	public:
+		FileWriter() : std::ofstream() {};
+		FileWriter(std::string &fileName) : std::ofstream(fileName) {};
+		~FileWriter();
+		void setText(std::list<std::pair<std::string, size_t>> text);
+		bool writeText();
 	};
 }

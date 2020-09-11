@@ -8,7 +8,7 @@ int main(int argc, char * argv[])
 {
 	if (argc != 3)
 	{
-		cout << "inName outName" << endl;
+		cout << "Wrong args: not enough file names" << endl;
 		return 1;
 	}
 	
@@ -16,6 +16,10 @@ int main(int argc, char * argv[])
 	string outName(argv[2]);
 	labFile::FileStringSpliter fss(inName);
 	fss.setDefaultDelimiters();
-	cout << fss.fillFreqTable() << endl;
+	cout << "File parsed: " << fss.fillFreqTable() << endl;
+	cout << "Words sorted: " << fss.fillAndSortFreqList() << endl;
+	labFile::FileWriter fw(outName);
+	fw.setText(fss.getList());
+	cout << "List saved :" << fw.writeText() << endl;
 	return 0;
 }

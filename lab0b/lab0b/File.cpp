@@ -1,5 +1,9 @@
 #include "File.h"
 
+labFile::FileStringSpliter::~FileStringSpliter()
+{
+}
+
 void labFile::FileStringSpliter::setDelimiters(std::string & delims)
 {
 	delimiters = delims;
@@ -15,6 +19,16 @@ void labFile::FileStringSpliter::setDefaultDelimiters()
 
 bool labFile::FileStringSpliter::fillAndSortFreqList()
 {
+	if (freqTable.empty())
+		return false;
+	freqList.clear();
+
+	for (auto iter = freqTable.begin(); iter != freqTable.end(); ++iter)
+		freqList.push_back(std::pair<std::string, size_t> (iter->first, iter->second));
+
+	freqList.sort(cmp);
+
+	return true;
 }
 
 bool labFile::FileStringSpliter::fillFreqTable()
@@ -23,7 +37,7 @@ bool labFile::FileStringSpliter::fillFreqTable()
 		return false;
 	freqTable.clear();
 	std::istringstream iss;
-	iss.imbue(std::locale(std::locale(), new DelimsContainer(delimiters)));
+	iss.imbue(std::locale(std::locale(), new DelimsLocale(delimiters)));
 
 	std::string line;
 	std::string word;
@@ -44,7 +58,29 @@ bool labFile::FileStringSpliter::fillFreqTable()
 	return true;
 }
 
-bool labFile::FileStringSpliter::cmp(std::pair<std::string, int> first, std::pair<std::string, int> second)
+std::list<std::pair<std::string, size_t>> labFile::FileStringSpliter::getList()
 {
-	return first.second < second.second;
+	return std::list<std::pair<std::string, size_t>>(freqList);
+}
+
+labFile::FileWriter::~FileWriter()
+{
+
+}
+
+void labFile::FileWriter::setText(std::list<std::pair<std::string, size_t>> text)
+{
+	this->text.clear();
+	this->text = text;
+}
+
+bool labFile::FileWriter::writeText()
+{
+	if(!this->is_open())
+		return false;
+
+	for (auto iter = text.begin(); iter != text.end(); ++iter)
+		*this << iter->first << " " << iter->second << std::endl;
+
+	return true;
 }
