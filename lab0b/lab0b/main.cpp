@@ -2,7 +2,6 @@
 #include <string>
 
 #include "File.h"
-#include "StatCollector.h"
 using namespace std;
 
 int main(int argc, char * argv[])
@@ -15,8 +14,8 @@ int main(int argc, char * argv[])
 	
 	string inName(argv[1]);
 	string outName(argv[2]);
-	labFile::FileReader fin(inName);
-	labFile::FileWriter fout(outName);
-	
+	labFile::FileStringSpliter fss(inName);
+	fss.setDefaultDelimiters();
+	cout << fss.fillFreqTable() << endl;
 	return 0;
 }
