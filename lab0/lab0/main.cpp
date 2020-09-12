@@ -28,7 +28,7 @@ namespace MyNameSpace
 int main(int argc, char** argv)
 {
 	//std::cout << "Hello world!" << "\n";
-
+	cout << "Test" << endl;
 	cout << Module1::getMyName() << "\n"; // вызов функции, объ€вленной в пространстве имен Module1
 	cout << Module2::getMyName() << "\n"; // аналогично, но Module2
 
@@ -36,12 +36,13 @@ int main(int argc, char** argv)
 	cout << getMyName() << "\n"; // (A) 
 	cout << Module2::getMyName() << "\n"; // вызов функции, объ€вленной в пространстве имен Module2
 
-	//using namespace Module2; // (B)
+	using namespace Module2; // (B)
 	//std::cout << getMyName() << "\n"; // COMPILATION ERROR (C) // так как уже используетс€ пространство имен Module1, 
 	// содержащее сигнатуру string getMyName(void), то повторное объ€вление с описанием данной функции
 	// вызовет ошибку.
 	//  ак исправить: не подключать пространство имен Module1, а вызывать фукнции из соответствующего пространства с указанием имени этого пространства
 
 	using Module2::getMyName; // с именем getMyName ассоциируетс€ функци€ из пространства имен Module2
-	std::cout << getMyName() << "\n"; // (D)
+	cout << getMyName() << "\n"; // (D)
+	cout << MyNameSpace::getMyName();
 }

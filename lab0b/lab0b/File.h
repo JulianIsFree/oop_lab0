@@ -7,11 +7,12 @@
 #include <string>
 #include <algorithm>
 
+
 namespace labFile 
 {	
 	inline bool cmp(std::pair<std::string, size_t> first, std::pair<std::string, size_t> second)
 	{
-		return first.second < second.second;
+		return first.second > second.second;
 	}
 
 	struct DelimsLocale : std::ctype<char>
@@ -34,26 +35,32 @@ namespace labFile
 		std::map<std::string, size_t> freqTable;
 		std::list<std::pair<std::string, size_t>> freqList;
 		std::string delimiters;
+		size_t wordCounter;
 	public:
-		FileStringSpliter() : std::ifstream() {};
-		FileStringSpliter(std::string &fileName) : std::ifstream(fileName) {};
+		FileStringSpliter() : std::ifstream() { wordCounter = 0; };
+		FileStringSpliter(const std::string & fileName) : std::ifstream(fileName) { wordCounter = 0; };
 		~FileStringSpliter();
-		void setDelimiters(std::string &delims);
+		void setDelimiters(const std::string & delims);
 		void setDefaultDelimiters();
 		bool fillAndSortFreqList();
 		bool fillFreqTable();
-		std::list<std::pair<std::string, size_t>> getList();
+		bool removeDelim(const char delim);
+		const std::list<std::pair<std::string, size_t>> &getList();
+		size_t getWordCounter();
 	};
 
 	class FileWriter : public std::ofstream
 	{
 	private:
 		std::list<std::pair<std::string, size_t>> text;
+		size_t wordCounter;
 	public:
-		FileWriter() : std::ofstream() {};
-		FileWriter(std::string &fileName) : std::ofstream(fileName) {};
+		FileWriter() : std::ofstream() { wordCounter = 0; };
+		FileWriter(const std::string & fileName) : std::ofstream(fileName) { wordCounter = 0; };
 		~FileWriter();
-		void setText(std::list<std::pair<std::string, size_t>> text);
-		bool writeText();
+		void setText(const std::list<std::pair<std::string, size_t>> &text);
+		void setText(FileStringSpliter & fss);
+		bool writeCSV();
+		size_t getWordCounter();
 	};
 }

@@ -4,7 +4,7 @@ labFile::FileStringSpliter::~FileStringSpliter()
 {
 }
 
-void labFile::FileStringSpliter::setDelimiters(std::string & delims)
+void labFile::FileStringSpliter::setDelimiters(const std::string & delims)
 {
 	delimiters = delims;
 }
@@ -12,7 +12,7 @@ void labFile::FileStringSpliter::setDelimiters(std::string & delims)
 void labFile::FileStringSpliter::setDefaultDelimiters()
 {
 	delimiters = "";
-	for (int i = 1; i < 256; ++i)
+	for (int i = 0; i < 256; ++i)
 		if(!isdigit(i) && !isalpha(i))
 			delimiters.push_back(i);
 }
@@ -22,10 +22,12 @@ bool labFile::FileStringSpliter::fillAndSortFreqList()
 	if (freqTable.empty())
 		return false;
 	freqList.clear();
-
+	wordCounter = 0;
 	for (auto iter = freqTable.begin(); iter != freqTable.end(); ++iter)
-		freqList.push_back(std::pair<std::string, size_t> (iter->first, iter->second));
-
+	{
+		freqList.push_back(std::pair<std::string, size_t>(iter->first, iter->second));
+		wordCounter += iter->second;
+	}
 	freqList.sort(cmp);
 
 	return true;
@@ -45,22 +47,30 @@ bool labFile::FileStringSpliter::fillFreqTable()
 	{
 		iss.str(line);
 		while (iss >> word)
-		{
-			auto iter = freqTable.find(word);
-			if (iter != freqTable.end())
-				freqTable[word]++;
-			else
-				freqTable[word] = 1;
-		}
+			freqTable[word]++;
 		iss.clear();
 	}
 	
 	return true;
 }
 
-std::list<std::pair<std::string, size_t>> labFile::FileStringSpliter::getList()
+bool labFile::FileStringSpliter::removeDelim(const char delim)
 {
-	return std::list<std::pair<std::string, size_t>>(freqList);
+	size_t index = delimiters.find(delim);
+	if (index < 0)
+		return false;
+	delimiters.erase(index);
+	return true;
+}
+
+const std::list<std::pair<std::string, size_t>>& labFile::FileStringSpliter::getList()
+{
+	return freqList;
+}
+
+size_t labFile::FileStringSpliter::getWordCounter()
+{
+	return wordCounter;
 }
 
 labFile::FileWriter::~FileWriter()
@@ -68,19 +78,35 @@ labFile::FileWriter::~FileWriter()
 
 }
 
-void labFile::FileWriter::setText(std::list<std::pair<std::string, size_t>> text)
+void labFile::FileWriter::setText(const std::list<std::pair<std::string, size_t>> &text)
 {
 	this->text.clear();
 	this->text = text;
+	
+	wordCounter = 0;
+	for (auto iter = text.begin(); iter != text.end(); ++iter)
+		wordCounter += iter->second;
 }
 
-bool labFile::FileWriter::writeText()
+void labFile::FileWriter::setText(FileStringSpliter & fss)
+{
+	this->text.clear();
+	this->text = fss.getList();
+	this->wordCounter = fss.getWordCounter();
+}
+
+bool labFile::FileWriter::writeCSV()
 {
 	if(!this->is_open())
 		return false;
 
 	for (auto iter = text.begin(); iter != text.end(); ++iter)
-		*this << iter->first << " " << iter->second << std::endl;
+		*this << iter->first << "," << iter->second << "," << static_cast<double>(iter->second * 100) / wordCounter << "%" <<std::endl;
 
 	return true;
+}
+
+size_t labFile::FileWriter::getWordCounter()
+{
+	return wordCounter;
 }
